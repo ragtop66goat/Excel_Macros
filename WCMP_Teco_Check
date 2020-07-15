@@ -1,0 +1,36 @@
+Sub wcmpTecoCheck()
+
+'declare workbooks and sheets
+
+Dim wb As Workbook
+Dim DailyRawData As Worksheet
+Dim ReportTool As Worksheet
+
+'declare variables for the loop
+
+Dim SysStatus As String
+Dim i As Long
+
+'sets workbook and sheets
+
+Set wb = ActiveWorkbook
+Set DailyRawData = wb.Sheets("DailyRawData")
+Set ReportTool = wb.Sheets("ReportTool")
+
+'check to see if order is TECO and WCMP
+
+For i = 2 To DailyRawData.Range("O" & Rows.Count).End(xlUp).Row
+    SysStatus = Left(DailyRawData.Cells(i, "O").Value, 4)   'set SysStatus to the first four characters in DailyRawData clumn "O"
+    
+    If SysStatus = "TECO" And DailyRawData.Cells(i, "E").Value = "WCMP" Then  'moves TECO and WCMP order number to ReportTool column "A"
+        ReportTool.Cells(i, "A").Value = DailyRawData.Cells(i, "A").Value
+        
+    ElseIf DailyRawData.Cells(i, "E").Value = "WCMP" Then
+        ReportTool.Cells(i, "B").Value = DailyRawData.Cells(i, "A").Value    'moves WCMP and not TECO to ReportTool column "B"
+    
+        
+    End If
+    
+Next i
+
+End Sub
