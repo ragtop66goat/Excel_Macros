@@ -1,0 +1,46 @@
+'This macro will copy entire rows that meet a specified criterion and can also automatically update a pivot table that has the transferred data as the data source for the pivot table
+Sub CopyRows()
+
+'finish the macro in case it encounters an error
+On Error Resume Next
+
+Dim pt As PivotTable
+
+Set pt = Worksheets("FollowUpPivot").PivotTables("FollowUps")
+
+'get the number of used rows in the source workbook for the length of the loop
+
+a = Worksheets("RawGenWork").Cells(Rows.Count, 1).End(xlUp).Row
+
+    For i = 2 To a
+        
+        'validates the data for the criteria to be checked
+        If Worksheets("RawGenWork").Cells(i, 32).Value > 7000000000# Then
+        
+        'copies the row to be moved
+        Worksheets("RawGenWork").Rows(i).Copy
+        
+        'activates destination worksheet
+        Worksheets("FollowUpWork").Activate
+        
+       'Find the number of used cells in the destination worksheet  for the loop variable
+        b = Worksheets("FollowUpWork").Cells(Rows.Count, 1).End(xlUp).Row
+        
+       'Find the next empty cell to paste in on destination worksheet
+        Worksheets("FollowUpWork").Cells(b + 1, 1).Select
+        ActiveSheet.Paste
+        
+        'go back to source worksheet for the loop to continue
+        Worksheets("RawGenWork").Activate
+        
+    End If
+    
+Next i
+
+'the next two lines activate the worksheet containing the pivot table and refresh it. This is optional
+Worksheets("FollowUpPivot").Activate
+
+pt.RefreshTable
+
+
+End Sub
