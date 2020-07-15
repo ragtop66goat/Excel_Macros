@@ -1,0 +1,93 @@
+Sub generatedOrders()
+
+' set workbook
+
+Dim wb As Workbook
+
+'set sheets
+
+Dim ReportTool As Worksheet
+Dim DailyRawData As Worksheet
+
+'set variables for loops
+
+Dim i As Long
+Dim UserStatus As String
+Dim target As Long
+Dim toAdd As Boolean
+Dim uniqueNumber As Long
+Dim j As Long
+
+Set wb = ActiveWorkbook
+Set DailyRawData = wb.Sheets("DailyRawData")
+Set ReportTool = wb.Sheets("ReportTool")
+
+'identify work orders from RawData with reference numbers as generated work
+
+
+For i = 1 To DailyRawData.Range("A" & Rows.Count).End(xlUp).Row
+
+    If Not IsEmpty(DailyRawData.Cells(i, "A").Value) And Not IsEmpty(DailyRawData.Cells(i, "AF").Value) Then
+        ReportTool.Cells(i, "D").Value = DailyRawData.Cells(i, "A").Value     'place order number on ReportTool column D
+        ReportTool.Cells(i, "F").Value = DailyRawData.Cells(i, "AF").Value    'place reference number on ReportTool column F
+    End If
+    
+Next i
+
+
+'pull user status from DailyRawData for generated work orders and place in coordinateing colum/row in ReportTool
+
+
+
+For i = 2 To DailyRawData.Range("E" & Rows.Count).End(xlUp).Row
+
+    If DailyRawData.Cells(i, "AF").Value > 7001000000# And DailyRawData.Cells(i, "AF").Value < 7001999999# Then  'ensure field has a valid reference number
+    
+        UserStatus = DailyRawData.Cells(i, "E").Value  'initiate UserStatus inside If statement so i in loop is correct
+        
+        Select Case UserStatus
+            Case Is = "UNPL"
+                ReportTool.Cells(i, "H").Value = DailyRawData.Cells(i, "A").Value
+            Case Is = "PORD"
+                ReportTool.Cells(i, "I").Value = DailyRawData.Cells(i, "A").Value
+            Case Is = "WPRT"
+                ReportTool.Cells(i, "J").Value = DailyRawData.Cells(i, "A").Value
+            Case Is = "R2BS"
+                ReportTool.Cells(i, "K").Value = DailyRawData.Cells(i, "A").Value
+            Case Is = "WCMP"
+                ReportTool.Cells(i, "L").Value = DailyRawData.Cells(i, "A").Value
+            Case Else
+                ReportTool.Cells(i, "M").Value = DailyRawData.Cells(i, "E").Value   'if order is in none of the above status, colum M gets the actual User Status Text
+            
+        End Select
+        
+    ElseIf Not IsEmpty(DailyRawData.Cells(i, "AF").Value) Then   'if reference field is not blank but has invalid entry identify error
+        ReportTool.Cells(i, "E").Value = "ERROR"
+    
+                
+    End If
+    
+Next i
+
+uniqueNumber = 1
+toAdd = True
+
+For i = 2 To ReportTool.Range("F" & Rows.Count).End(xlUp).Row
+    For j = 1 To uniqueNumber
+        If ReportTool.Cells(i, "F").Value = ReportTool.Cells(j, "G").Value Then  'if the number in column "F" is the same as column "G" don't add it
+            toAdd = False
+        End If
+    Next j
+    
+'if the number in coumn "F" is not the same as the number in column "G" then add it
+
+        If toAdd = True And ReportTool.Cells(i, "F") > 7001000000# And ReportTool.Cells(i, "F").Value < 7001999999# Then
+            ReportTool.Cells(uniqueNumber + 1, "G").Value = ReportTool.Cells(i, "F").Value
+            uniqueNumber = uniqueNumber + 1
+        End If
+        toAdd = True
+        
+    Next i
+
+
+End Sub
